@@ -1,0 +1,22 @@
+def generate_sql(question):
+    prompt = f"""
+You are an expert in converting natural language into SQL.
+Generate only a valid SQLite-compatible SQL query for the following question:
+
+'{question}'
+
+Table: employees(id, name, department, designation, salary, location, hire_date)
+
+Do not include any explanation or commentary — just the SQL code inside triple backticks.
+"""
+    response = client.chat.completions.create(
+        model="llama3-8b-8192",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    raw_response = response.choices[0].message.content
+
+    # Extract SQL code from any type of triple backticks
+    match = re.search(r"```(?:sql)?\s*(.*?)```", raw_response, re.DOTALL | re.IGNORECASE)
+    sql_query = match.group(1).strip() if match else raw_response.strip()
+
+    return sql_query
